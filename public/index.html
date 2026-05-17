@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delhi AQI Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="logo-dot"></div>
+      <span class="logo-text">Delhi AQI <em>Intelligence</em></span>
+    </div>
+    <div class="nav-links">
+      <a href="#" class="nav-link active" data-page="predict">Predict</a>
+      <a href="#" class="nav-link" data-page="analytics">Analytics</a>
+      <a href="#" class="nav-link" data-page="stats">Statistics</a>
+      <a href="#" class="nav-link" data-page="ai">AI Analyst</a>
+    </div>
+    <div class="nav-status" id="serverStatus">
+      <span class="status-dot"></span> Live Data
+    </div>
+  </div>
+</nav>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <div class="hero-inner">
+    <div class="hero-badge">Statistical AI Model · 2,122 Observations · 2020–2025</div>
+    <h1 class="hero-title">Delhi Air Quality <em>Predictor</em></h1>
+    <p class="hero-sub">Powered by Linear Regression · Bayesian Inference · Normal Distribution · Hypothesis Testing</p>
+    <div class="hero-stats" id="heroStats">
+      <div class="hs-chip"><span class="hs-val" id="hs-mean">—</span><span class="hs-lbl">Global Mean</span></div>
+      <div class="hs-chip"><span class="hs-val" id="hs-std">—</span><span class="hs-lbl">Std Dev σ</span></div>
+      <div class="hs-chip"><span class="hs-val" id="hs-median">—</span><span class="hs-lbl">Median</span></div>
+      <div class="hs-chip"><span class="hs-val" id="hs-n">—</span><span class="hs-lbl">Data Points</span></div>
+      <div class="hs-chip"><span class="hs-val" id="hs-r2">—</span><span class="hs-lbl">R² Score</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE: PREDICT ═══════════ -->
+<div class="page active" id="page-predict">
+  <div class="container">
+
+    <div class="predict-grid">
+      <!-- Left: Controls -->
+      <div class="predict-controls card">
+        <div class="card-header">
+          <span class="card-label">Prediction Engine</span>
+          <h2 class="card-title">Configure Forecast</h2>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Prediction Scope</label>
+          <div class="seg-control" id="scopeSeg">
+            <button class="seg-btn active" data-val="month">Month</button>
+            <button class="seg-btn" data-val="day">Day</button>
+            <button class="seg-btn" data-val="week">Week</button>
+            <button class="seg-btn" data-val="year">Year</button>
+          </div>
+        </div>
+
+        <div class="form-group" id="fgMonth">
+          <label class="form-label">Month</label>
+          <div class="custom-select-wrap">
+            <select id="selMonth" class="form-select">
+              <option value="1">January</option><option value="2">February</option>
+              <option value="3">March</option><option value="4">April</option>
+              <option value="5">May</option><option value="6">June</option>
+              <option value="7">July</option><option value="8">August</option>
+              <option value="9">September</option><option value="10">October</option>
+              <option value="11">November</option><option value="12">December</option>
+            </select>
+            <svg class="sel-arrow" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="form-group hidden" id="fgDay">
+          <label class="form-label">Day of Month</label>
+          <div class="custom-select-wrap">
+            <select id="selDay" class="form-select"></select>
+            <svg class="sel-arrow" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="form-group hidden" id="fgWeek">
+          <label class="form-label">Week of Year: <span id="weekDisplay" style="color:var(--teal);font-weight:600">Week 20</span></label>
+          <input type="range" id="selWeek" class="range-input" min="1" max="52" value="20">
+          <div class="range-labels"><span>Jan</span><span>Apr</span><span>Jul</span><span>Oct</span><span>Dec</span></div>
+        </div>
+
+        <div class="form-group hidden" id="fgYear">
+          <label class="form-label">Target Year</label>
+          <div class="custom-select-wrap">
+            <select id="selYear" class="form-select">
+              <option value="2025">2025</option><option value="2026" selected>2026</option>
+              <option value="2027">2027</option><option value="2028">2028</option>
+              <option value="2029">2029</option><option value="2030">2030</option>
+            </select>
+            <svg class="sel-arrow" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Statistical Method</label>
+          <div class="method-cards" id="methodCards">
+            <div class="method-card-opt active" data-method="regression">
+              <div class="mc-icon">📈</div>
+              <div class="mc-info"><strong>Linear Regression</strong><span>Trend + seasonal fit</span></div>
+            </div>
+            <div class="method-card-opt" data-method="bayes">
+              <div class="mc-icon">🎯</div>
+              <div class="mc-info"><strong>Bayesian</strong><span>Posterior mean estimate</span></div>
+            </div>
+            <div class="method-card-opt" data-method="normal">
+              <div class="mc-icon">🔔</div>
+              <div class="mc-info"><strong>Normal Dist.</strong><span>N(μ, σ²) model</span></div>
+            </div>
+            <div class="method-card-opt" data-method="seasonal">
+              <div class="mc-icon">🌊</div>
+              <div class="mc-info"><strong>Seasonal</strong><span>STL decomposition</span></div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-predict" id="btnPredict">
+          <span class="btn-text">Run Prediction</span>
+          <svg class="btn-arrow" viewBox="0 0 20 20"><path d="M4 10h12M11 5l5 5-5 5" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Right: Result -->
+      <div class="predict-result" id="resultPanel">
+        <div class="result-placeholder" id="resultPlaceholder">
+          <div class="placeholder-icon">◎</div>
+          <p>Configure parameters and click <strong>Run Prediction</strong> to generate a statistically-grounded AQI forecast</p>
+        </div>
+
+        <div class="result-content hidden" id="resultContent">
+          <div class="result-top-row">
+            <div class="aqi-gauge-wrap">
+              <svg class="aqi-gauge" viewBox="0 0 160 100" id="gaugeSvg">
+                <defs>
+                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#52b788"/>
+                    <stop offset="30%" style="stop-color:#f4a261"/>
+                    <stop offset="60%" style="stop-color:#e76f51"/>
+                    <stop offset="80%" style="stop-color:#c1121f"/>
+                    <stop offset="100%" style="stop-color:#6a0572"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 15 85 A 65 65 0 0 1 145 85" fill="none" stroke="#edf2f4" stroke-width="12" stroke-linecap="round"/>
+                <path d="M 15 85 A 65 65 0 0 1 145 85" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="204" stroke-dashoffset="0" opacity="0.3"/>
+                <path id="gaugeArc" d="M 15 85 A 65 65 0 0 1 145 85" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="204" stroke-dashoffset="204"/>
+                <line id="gaugeNeedle" x1="80" y1="85" x2="80" y2="28" stroke="#264653" stroke-width="2.5" stroke-linecap="round" transform="rotate(0 80 85)"/>
+                <circle cx="80" cy="85" r="5" fill="#264653"/>
+                <text x="80" y="75" text-anchor="middle" font-family="JetBrains Mono" font-size="18" font-weight="500" fill="#264653" id="gaugeText">—</text>
+                <text x="80" y="96" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="7" fill="#7a9ba5">AQI</text>
+              </svg>
+            </div>
+            <div class="result-meta">
+              <div class="res-period" id="resPeriod">—</div>
+              <div class="res-cat" id="resCat">—</div>
+              <div class="res-advice" id="resAdvice">—</div>
+              <div class="res-formula" id="resFormula">—</div>
+            </div>
+          </div>
+
+          <div class="stat-chips-row">
+            <div class="stat-chip-s"><div class="scs-v" id="sc-mean">—</div><div class="scs-l">Hist. Mean μ</div></div>
+            <div class="stat-chip-s"><div class="scs-v" id="sc-std">—</div><div class="scs-l">Std Dev σ</div></div>
+            <div class="stat-chip-s"><div class="scs-v" id="sc-ci-l">—</div><div class="scs-l">CI Low (95%)</div></div>
+            <div class="stat-chip-s"><div class="scs-v" id="sc-median">—</div><div class="scs-l">Median</div></div>
+            <div class="stat-chip-s"><div class="scs-v" id="sc-ci-u">—</div><div class="scs-l">CI High (95%)</div></div>
+            <div class="stat-chip-s"><div class="scs-v" id="sc-z">—</div><div class="scs-l">Z-Score</div></div>
+          </div>
+
+          <div class="conf-section">
+            <div class="conf-row"><span>Model Confidence</span><span class="conf-pct" id="confPct">—</span></div>
+            <div class="conf-track"><div class="conf-fill" id="confFill"></div></div>
+          </div>
+
+          <div class="method-note" id="methodNote">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly forecast table -->
+    <div class="card mt-32" id="forecastCard" style="display:none">
+      <div class="card-header">
+        <span class="card-label">12-Month Outlook</span>
+        <h2 class="card-title">Full Year Forecast</h2>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table" id="forecastTable">
+          <thead>
+            <tr>
+              <th>Month</th><th>Predicted AQI</th><th>95% CI Lower</th>
+              <th>95% CI Upper</th><th>Category</th><th>Z-Score</th><th>Model Formula</th>
+            </tr>
+          </thead>
+          <tbody id="forecastBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════ PAGE: ANALYTICS ═══════════ -->
+<div class="page hidden" id="page-analytics">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label">Historical Trends</div>
+      <h2 class="section-title">Visual Analytics</h2>
+    </div>
+    <div class="charts-grid-2x2">
+      <div class="chart-card">
+        <div class="chart-card-head"><h3>Monthly AQI Profile</h3><span>Mean ± σ · 2020–2025</span></div>
+        <canvas id="monthlyBarChart" height="200"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head"><h3>Yearly Trend + Regression</h3><span>Actual vs predicted trend line</span></div>
+        <canvas id="yearlyLineChart" height="200"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head"><h3>AQI Frequency Distribution</h3><span>Observed vs Normal distribution overlay</span></div>
+        <canvas id="distBarChart" height="200"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head"><h3>Seasonal Radar · All Years</h3><span>Monthly pattern per year</span></div>
+        <canvas id="radarChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="card mt-32">
+      <div class="card-header">
+        <span class="card-label">Daily Drill-Down</span>
+        <h2 class="card-title">Daily AQI Viewer</h2>
+      </div>
+      <div class="drilldown-controls">
+        <div class="custom-select-wrap" style="width:160px">
+          <select id="ddYear" class="form-select">
+            <option value="2020">2020</option><option value="2021">2021</option>
+            <option value="2022">2022</option><option value="2023">2023</option>
+            <option value="2024">2024</option><option value="2025">2025</option>
+          </select>
+          <svg class="sel-arrow" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        </div>
+        <div class="custom-select-wrap" style="width:160px">
+          <select id="ddMonth" class="form-select">
+            <option value="1">January</option><option value="2">February</option>
+            <option value="3">March</option><option value="4">April</option>
+            <option value="5">May</option><option value="6">June</option>
+            <option value="7">July</option><option value="8">August</option>
+            <option value="9">September</option><option value="10">October</option>
+            <option value="11">November</option><option value="12">December</option>
+          </select>
+          <svg class="sel-arrow" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        </div>
+        <button class="btn-sm" id="btnLoadDaily">Load Daily Data</button>
+      </div>
+      <canvas id="dailyChart" height="120"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE: STATISTICS ═══════════ -->
+<div class="page hidden" id="page-stats">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label">Statistical Parameters</div>
+      <h2 class="section-title">Comprehensive Analysis</h2>
+    </div>
+
+    <div class="stats-big-grid" id="statsBigGrid">
+      <div class="stat-panel">
+        <div class="sp-header">Descriptive Statistics</div>
+        <div class="sp-body" id="spDescriptive"></div>
+      </div>
+      <div class="stat-panel">
+        <div class="sp-header">Regression Analysis</div>
+        <div class="sp-body" id="spRegression"></div>
+      </div>
+      <div class="stat-panel">
+        <div class="sp-header">Distribution Tests</div>
+        <div class="sp-body" id="spDistribution"></div>
+      </div>
+    </div>
+
+    <div class="card mt-32">
+      <div class="card-header">
+        <span class="card-label">AQI Reference Scale</span>
+        <h2 class="card-title">India CPCB Categories</h2>
+      </div>
+      <div class="aqi-scale-bar">
+        <div class="asb-item" style="--c:#52b788"><div class="asb-range">0–50</div><div class="asb-name">Good</div><div class="asb-pct" id="pct0"></div></div>
+        <div class="asb-item" style="--c:#74c69d"><div class="asb-range">51–100</div><div class="asb-name">Satisfactory</div><div class="asb-pct" id="pct1"></div></div>
+        <div class="asb-item" style="--c:#f4a261"><div class="asb-range">101–200</div><div class="asb-name">Moderate</div><div class="asb-pct" id="pct2"></div></div>
+        <div class="asb-item" style="--c:#e76f51"><div class="asb-range">201–300</div><div class="asb-name">Poor</div><div class="asb-pct" id="pct3"></div></div>
+        <div class="asb-item" style="--c:#c1121f"><div class="asb-range">301–400</div><div class="asb-name">Very Poor</div><div class="asb-pct" id="pct4"></div></div>
+        <div class="asb-item" style="--c:#6a0572"><div class="asb-range">401+</div><div class="asb-name">Severe</div><div class="asb-pct" id="pct5"></div></div>
+      </div>
+
+      <div class="card mt-24">
+        <div class="card-header"><span class="card-label">Monthly Breakdown</span><h2 class="card-title">Year × Month Matrix</h2></div>
+        <div class="table-scroll"><table class="data-table" id="matrixTable"></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE: AI ═══════════ -->
+<div class="page hidden" id="page-ai">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label">AI Statistical Analyst</div>
+      <h2 class="section-title">Ask About Delhi AQI</h2>
+    </div>
+
+    <div class="ai-layout">
+      <div class="ai-chat-panel">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg ai">
+            <div class="chat-avatar">AI</div>
+            <div class="chat-bubble">
+              Hello! I'm your Delhi AQI Statistical Analyst, trained on real daily data from 2020–2025 (2,122 observations).<br><br>
+              Ask me anything about Delhi's air quality — predictions, statistical analysis, correlations, hypothesis tests, or seasonal patterns. I'll explain using proper statistical concepts.
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-wrap">
+          <input type="text" id="chatInput" class="chat-input" placeholder="e.g. What is the probability that AQI exceeds 300 in November?">
+          <button class="chat-send" id="chatSend">
+            <svg viewBox="0 0 20 20" width="18" height="18"><path d="M2 10l16-8-8 16V10H2z" fill="currentColor"/></svg>
+          </button>
+        </div>
+        <div class="suggested-qs">
+          <span class="sq-label">Try:</span>
+          <button class="sq-btn">Why is Delhi AQI high in winter?</button>
+          <button class="sq-btn">Explain the chi-square test result</button>
+          <button class="sq-btn">What does Z-score mean for AQI?</button>
+          <button class="sq-btn">Predict AQI trend for 2030</button>
+        </div>
+      </div>
+
+      <div class="ai-context-panel">
+        <div class="card">
+          <div class="sp-header">Live Data Context</div>
+          <div class="sp-body" id="aiContextPanel"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
