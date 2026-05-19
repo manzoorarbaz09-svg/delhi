@@ -1,3 +1,4 @@
+require('dotenv').config(); // Load environment variables first
 const express = require('express');
 const cors    = require('cors');
 const XLSX    = require('xlsx');
@@ -8,9 +9,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Explicit MIME routes — no public/ subfolder needed
-app.get('/app.js',    (req,res)=>{ res.setHeader('Content-Type','application/javascript'); res.sendFile(path.join(__dirname,'app.js')); });
-app.get('/style.css', (req,res)=>{ res.setHeader('Content-Type','text/css');               res.sendFile(path.join(__dirname,'style.css')); });
+// Serve static frontend assets securely from a 'public' folder
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ── CONSTANTS ──────────────────────────────────────────────
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -23,8 +23,10 @@ function loadAllData() {
     const file = path.join(__dirname, `AQI_daily_city_level_delhi_${yr}_delhi_${yr}.xlsx`);
     if (!fs.existsSync(file)) continue;
     const wb   = XLSX.readFile(file);
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    // Added { raw: false } to properly parse Excel Date formats into strings
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
     yearlyRaw[yr] = {};
+    
     rows.forEach(row => {
       MONTHS.forEach((m, mi) => {
         const val = row[m];
@@ -116,8 +118,14 @@ function buildMLR(allRecords) {
   const y = allRecords.map(r=>r.aqi);
   const k = X[0].length;
 
-  // Normal equations: beta = (X'X)^-1 X'y
   const XtX = Array.from({length:k},(_,i)=>Array.from({length:k},(_,j)=>X.reduce((s,row)=>s+row[i]*row[j],0)));
+  
+  // FIX: Apply Ridge Regularization to prevent division-by-zero (perfect collinearity)
+  const lambda = 1e-4;
+  for (let i = 0; i < k; i++) {
+    XtX[i][i] += lambda; 
+  }
+
   const Xty = Array.from({length:k},(_,i)=>X.reduce((s,row,ri)=>s+row[i]*y[ri],0));
   const aug  = XtX.map((row,i)=>[...row,Xty[i]]);
 
@@ -125,6 +133,10 @@ function buildMLR(allRecords) {
     let maxRow=col;
     for (let row=col+1; row<k; row++) if(Math.abs(aug[row][col])>Math.abs(aug[maxRow][col])) maxRow=row;
     [aug[col],aug[maxRow]]=[aug[maxRow],aug[col]];
+    
+    // FIX: Fallback to avoid dividing by absolute zero if collinearity persists
+    if (Math.abs(aug[col][col]) < 1e-12) aug[col][col] = 1e-12; 
+
     for (let row=col+1; row<k; row++) {
       const f=aug[row][col]/aug[col][col];
       for (let j=col;j<=k;j++) aug[row][j]-=f*aug[col][j];
@@ -327,7 +339,6 @@ function predict(type, month, day, week, targetYear, method) {
         methodFormula=`Normal Distribution: X ~ N(${ms.mean}, ${ms.std}²)`;
     }
 
-    // CI based on method-specific spread
     const spread = method==='ensemble' ? ms.std*0.75 : ms.std;
     ciLower=Math.max(0,Math.round(predicted-1.96*spread));
     ciUpper=Math.round(predicted+1.96*spread);
@@ -388,7 +399,8 @@ Explain clearly for a 1st-year CSE Statistics student. Use bullet points.`;
     const r=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:ctx,messages:[{role:'user',content:question}]})
+      // FIX: Updated model to an active Anthropic Model ID
+      body:JSON.stringify({model:'claude-3-5-sonnet-20240620',max_tokens:1000,system:ctx,messages:[{role:'user',content:question}]})
     });
     const d=await r.json();
     if(d.error) return res.status(500).json({success:false,error:d.error.message});
@@ -396,8 +408,12 @@ Explain clearly for a 1st-year CSE Statistics student. Use bullet points.`;
   }catch(e){res.status(500).json({success:false,error:e.message});}
 });
 
-// Serve index.html for all other routes
-app.get('/{*splat}',(req,res)=>{ res.setHeader('Content-Type','text/html'); res.sendFile(path.join(__dirname,'index.html')); });
+// FIX: Corrected Express Catch-all Route for Client Side Routing (SPA)
+app.get('*',(req,res)=>{ 
+  res.setHeader('Content-Type','text/html'); 
+  // Make sure your index.html is moved inside the 'public' folder
+  res.sendFile(path.join(__dirname,'public', 'index.html')); 
+});
 
 const PORT=process.env.PORT||3000;
 app.listen(PORT,()=>console.log(`✅ Delhi AQI Server running on http://localhost:${PORT}`));
