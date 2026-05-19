@@ -295,23 +295,3 @@ body {
 
 /* ─── DOT CATEGORY ─── */
 .dot-cat { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; vertical-align:middle; }
-
-/* ─── R² BAR ─── */
-.r2-section { margin-bottom: 14px; }
-.r2-row { display:flex; justify-content:space-between; font-size:12px; color:var(--text-mid); margin-bottom:5px; }
-.r2-val { font-weight:700; color:var(--teal); font-family:'JetBrains Mono',monospace; font-size:14px; }
-.r2-track { height:10px; background:var(--bg2); border-radius:5px; overflow:hidden; margin-bottom:3px; }
-.r2-fill { height:100%; background:linear-gradient(90deg,#f4a261,#2a9d8f); border-radius:5px; transition:width 0.8s ease; }
-.r2-labels { display:flex; justify-content:space-between; font-size:9px; color:var(--text-soft); font-family:'JetBrains Mono',monospace; }
-
-/* ─── ENSEMBLE BREAKDOWN ─── */
-.breakdown-box { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:14px; }
-.bb-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--teal); font-family:'JetBrains Mono',monospace; margin-bottom:8px; }
-.bb-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid var(--border-l); font-size:11px; color:var(--text-mid); }
-.bb-row:last-child { border-bottom:none; }
-.bb-total { font-weight:700; color:var(--slate); margin-top:4px; padding-top:8px; border-top:2px solid var(--border) !important; }
-.bb-val { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--teal); }
-.bb-total .bb-val { color:var(--slate); font-size:13px; }
-
-/* ─── METHOD CARDS 3-col ─── */
-.method-cards { display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; }
