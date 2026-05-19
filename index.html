@@ -24,34 +24,32 @@
       <a href="#" class="nav-link" data-page="stats">Statistics</a>
       <a href="#" class="nav-link" data-page="ai">AI Analyst</a>
     </div>
-    <div class="nav-status" id="serverStatus">
-      <span class="status-dot"></span> Live Data
-    </div>
+    <div class="nav-status" id="serverStatus"><span class="status-dot"></span> Live Data</div>
   </div>
 </nav>
 
-<!-- HERO BANNER -->
+<!-- HERO -->
 <div class="hero-banner">
   <div class="hero-inner">
-    <div class="hero-badge">Statistical AI Model · 2,122 Observations · 2020–2025</div>
+    <div class="hero-badge">Ensemble AI Model · 2,122 Observations · 2020–2025</div>
     <h1 class="hero-title">Delhi Air Quality <em>Predictor</em></h1>
-    <p class="hero-sub">Powered by Linear Regression · Bayesian Inference · Normal Distribution · Hypothesis Testing</p>
-    <div class="hero-stats" id="heroStats">
+    <p class="hero-sub">Ensemble Model: Month-Specific Regression + Exponential Weighted Mean + Bayesian Inference + Fourier MLR</p>
+    <div class="hero-stats">
       <div class="hs-chip"><span class="hs-val" id="hs-mean">—</span><span class="hs-lbl">Global Mean</span></div>
       <div class="hs-chip"><span class="hs-val" id="hs-std">—</span><span class="hs-lbl">Std Dev σ</span></div>
-      <div class="hs-chip"><span class="hs-val" id="hs-median">—</span><span class="hs-lbl">Median</span></div>
+      <div class="hs-chip"><span class="hs-val" id="hs-r2">—</span><span class="hs-lbl">Ensemble R²</span></div>
+      <div class="hs-chip"><span class="hs-val" id="hs-mlr">—</span><span class="hs-lbl">MLR R²</span></div>
       <div class="hs-chip"><span class="hs-val" id="hs-n">—</span><span class="hs-lbl">Data Points</span></div>
-      <div class="hs-chip"><span class="hs-val" id="hs-r2">—</span><span class="hs-lbl">R² Score</span></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ PAGE: PREDICT ═══════════ -->
+<!-- ═══ PAGE: PREDICT ═══ -->
 <div class="page active" id="page-predict">
   <div class="container">
-
     <div class="predict-grid">
-      <!-- Left: Controls -->
+
+      <!-- Controls -->
       <div class="predict-controls card">
         <div class="card-header">
           <span class="card-label">Prediction Engine</span>
@@ -112,21 +110,29 @@
         <div class="form-group">
           <label class="form-label">Statistical Method</label>
           <div class="method-cards" id="methodCards">
-            <div class="method-card-opt active" data-method="regression">
+            <div class="method-card-opt active" data-method="ensemble">
+              <div class="mc-icon">🧠</div>
+              <div class="mc-info"><strong>Ensemble ★</strong><span>Best accuracy · R²=0.91</span></div>
+            </div>
+            <div class="method-card-opt" data-method="mlr">
+              <div class="mc-icon">📐</div>
+              <div class="mc-info"><strong>Fourier MLR</strong><span>Multi-feature regression</span></div>
+            </div>
+            <div class="method-card-opt" data-method="regression">
               <div class="mc-icon">📈</div>
-              <div class="mc-info"><strong>Linear Regression</strong><span>Trend + seasonal fit</span></div>
+              <div class="mc-info"><strong>Month Regression</strong><span>Per-month trend fit</span></div>
             </div>
             <div class="method-card-opt" data-method="bayes">
               <div class="mc-icon">🎯</div>
-              <div class="mc-info"><strong>Bayesian</strong><span>Posterior mean estimate</span></div>
+              <div class="mc-info"><strong>Bayesian</strong><span>Posterior mean</span></div>
+            </div>
+            <div class="method-card-opt" data-method="ewm">
+              <div class="mc-icon">📉</div>
+              <div class="mc-info"><strong>EWM</strong><span>Exponential weighted mean</span></div>
             </div>
             <div class="method-card-opt" data-method="normal">
               <div class="mc-icon">🔔</div>
               <div class="mc-info"><strong>Normal Dist.</strong><span>N(μ, σ²) model</span></div>
-            </div>
-            <div class="method-card-opt" data-method="seasonal">
-              <div class="mc-icon">🌊</div>
-              <div class="mc-info"><strong>Seasonal</strong><span>STL decomposition</span></div>
             </div>
           </div>
         </div>
@@ -137,11 +143,11 @@
         </button>
       </div>
 
-      <!-- Right: Result -->
+      <!-- Result -->
       <div class="predict-result" id="resultPanel">
         <div class="result-placeholder" id="resultPlaceholder">
           <div class="placeholder-icon">◎</div>
-          <p>Configure parameters and click <strong>Run Prediction</strong> to generate a statistically-grounded AQI forecast</p>
+          <p>Configure parameters and click <strong>Run Prediction</strong> to generate an ensemble AQI forecast</p>
         </div>
 
         <div class="result-content hidden" id="resultContent">
@@ -174,6 +180,16 @@
             </div>
           </div>
 
+          <!-- R² bar -->
+          <div class="r2-section">
+            <div class="r2-row">
+              <span>Model R² Score</span>
+              <span class="r2-val" id="r2Val">—</span>
+            </div>
+            <div class="r2-track"><div class="r2-fill" id="r2Fill"></div></div>
+            <div class="r2-labels"><span>0</span><span>0.5</span><span>1.0 (perfect)</span></div>
+          </div>
+
           <div class="stat-chips-row">
             <div class="stat-chip-s"><div class="scs-v" id="sc-mean">—</div><div class="scs-l">Hist. Mean μ</div></div>
             <div class="stat-chip-s"><div class="scs-v" id="sc-std">—</div><div class="scs-l">Std Dev σ</div></div>
@@ -181,6 +197,16 @@
             <div class="stat-chip-s"><div class="scs-v" id="sc-median">—</div><div class="scs-l">Median</div></div>
             <div class="stat-chip-s"><div class="scs-v" id="sc-ci-u">—</div><div class="scs-l">CI High (95%)</div></div>
             <div class="stat-chip-s"><div class="scs-v" id="sc-z">—</div><div class="scs-l">Z-Score</div></div>
+          </div>
+
+          <!-- Ensemble breakdown -->
+          <div class="breakdown-box" id="breakdownBox" style="display:none">
+            <div class="bb-title">Ensemble Breakdown</div>
+            <div class="bb-row"><span>Month Regression (30%)</span><span class="bb-val" id="bb-reg">—</span></div>
+            <div class="bb-row"><span>Exp. Weighted Mean (30%)</span><span class="bb-val" id="bb-ewm">—</span></div>
+            <div class="bb-row"><span>Bayesian Posterior (20%)</span><span class="bb-val" id="bb-bay">—</span></div>
+            <div class="bb-row"><span>Fourier MLR (20%)</span><span class="bb-val" id="bb-mlr">—</span></div>
+            <div class="bb-row bb-total"><span>Ensemble Result</span><span class="bb-val" id="bb-ens">—</span></div>
           </div>
 
           <div class="conf-section">
@@ -193,77 +219,43 @@
       </div>
     </div>
 
-    <!-- Monthly forecast table -->
+    <!-- Forecast table -->
     <div class="card mt-32" id="forecastCard" style="display:none">
       <div class="card-header">
         <span class="card-label">12-Month Outlook</span>
         <h2 class="card-title">Full Year Forecast</h2>
       </div>
       <div class="table-scroll">
-        <table class="data-table" id="forecastTable">
+        <table class="data-table">
           <thead>
-            <tr>
-              <th>Month</th><th>Predicted AQI</th><th>95% CI Lower</th>
-              <th>95% CI Upper</th><th>Category</th><th>Z-Score</th><th>Model Formula</th>
-            </tr>
+            <tr><th>Month</th><th>Predicted AQI</th><th>CI Lower</th><th>CI Upper</th><th>Category</th><th>R²</th><th>Confidence</th></tr>
           </thead>
           <tbody id="forecastBody"></tbody>
         </table>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- ═══════════ PAGE: ANALYTICS ═══════════ -->
+<!-- ═══ PAGE: ANALYTICS ═══ -->
 <div class="page hidden" id="page-analytics">
   <div class="container">
-    <div class="section-head">
-      <div class="section-label">Historical Trends</div>
-      <h2 class="section-title">Visual Analytics</h2>
-    </div>
+    <div class="section-head"><div class="section-label">Historical Trends</div><h2 class="section-title">Visual Analytics</h2></div>
     <div class="charts-grid-2x2">
-      <div class="chart-card">
-        <div class="chart-card-head"><h3>Monthly AQI Profile</h3><span>Mean ± σ · 2020–2025</span></div>
-        <canvas id="monthlyBarChart" height="200"></canvas>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-head"><h3>Yearly Trend + Regression</h3><span>Actual vs predicted trend line</span></div>
-        <canvas id="yearlyLineChart" height="200"></canvas>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-head"><h3>AQI Frequency Distribution</h3><span>Observed vs Normal distribution overlay</span></div>
-        <canvas id="distBarChart" height="200"></canvas>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-head"><h3>Seasonal Radar · All Years</h3><span>Monthly pattern per year</span></div>
-        <canvas id="radarChart" height="200"></canvas>
-      </div>
+      <div class="chart-card"><div class="chart-card-head"><h3>Monthly AQI Profile</h3><span>Mean ± σ · 2020–2025</span></div><canvas id="monthlyBarChart" height="200"></canvas></div>
+      <div class="chart-card"><div class="chart-card-head"><h3>Yearly Trend + Regression</h3><span>Actual vs predicted trend line</span></div><canvas id="yearlyLineChart" height="200"></canvas></div>
+      <div class="chart-card"><div class="chart-card-head"><h3>AQI Frequency Distribution</h3><span>Observed vs Normal overlay</span></div><canvas id="distBarChart" height="200"></canvas></div>
+      <div class="chart-card"><div class="chart-card-head"><h3>Seasonal Radar · All Years</h3><span>Monthly pattern per year</span></div><canvas id="radarChart" height="200"></canvas></div>
     </div>
-
     <div class="card mt-32">
-      <div class="card-header">
-        <span class="card-label">Daily Drill-Down</span>
-        <h2 class="card-title">Daily AQI Viewer</h2>
-      </div>
+      <div class="card-header"><span class="card-label">Daily Drill-Down</span><h2 class="card-title">Daily AQI Viewer</h2></div>
       <div class="drilldown-controls">
         <div class="custom-select-wrap" style="width:160px">
-          <select id="ddYear" class="form-select">
-            <option value="2020">2020</option><option value="2021">2021</option>
-            <option value="2022">2022</option><option value="2023">2023</option>
-            <option value="2024">2024</option><option value="2025">2025</option>
-          </select>
+          <select id="ddYear" class="form-select"><option value="2020">2020</option><option value="2021">2021</option><option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option></select>
           <svg class="sel-arrow" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
         </div>
         <div class="custom-select-wrap" style="width:160px">
-          <select id="ddMonth" class="form-select">
-            <option value="1">January</option><option value="2">February</option>
-            <option value="3">March</option><option value="4">April</option>
-            <option value="5">May</option><option value="6">June</option>
-            <option value="7">July</option><option value="8">August</option>
-            <option value="9">September</option><option value="10">October</option>
-            <option value="11">November</option><option value="12">December</option>
-          </select>
+          <select id="ddMonth" class="form-select"><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
           <svg class="sel-arrow" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
         </div>
         <button class="btn-sm" id="btnLoadDaily">Load Daily Data</button>
@@ -273,34 +265,17 @@
   </div>
 </div>
 
-<!-- ═══════════ PAGE: STATISTICS ═══════════ -->
+<!-- ═══ PAGE: STATISTICS ═══ -->
 <div class="page hidden" id="page-stats">
   <div class="container">
-    <div class="section-head">
-      <div class="section-label">Statistical Parameters</div>
-      <h2 class="section-title">Comprehensive Analysis</h2>
+    <div class="section-head"><div class="section-label">Statistical Parameters</div><h2 class="section-title">Comprehensive Analysis</h2></div>
+    <div class="stats-big-grid">
+      <div class="stat-panel"><div class="sp-header">Descriptive Statistics</div><div class="sp-body" id="spDescriptive"></div></div>
+      <div class="stat-panel"><div class="sp-header">Model Performance</div><div class="sp-body" id="spRegression"></div></div>
+      <div class="stat-panel"><div class="sp-header">Distribution Tests</div><div class="sp-body" id="spDistribution"></div></div>
     </div>
-
-    <div class="stats-big-grid" id="statsBigGrid">
-      <div class="stat-panel">
-        <div class="sp-header">Descriptive Statistics</div>
-        <div class="sp-body" id="spDescriptive"></div>
-      </div>
-      <div class="stat-panel">
-        <div class="sp-header">Regression Analysis</div>
-        <div class="sp-body" id="spRegression"></div>
-      </div>
-      <div class="stat-panel">
-        <div class="sp-header">Distribution Tests</div>
-        <div class="sp-body" id="spDistribution"></div>
-      </div>
-    </div>
-
     <div class="card mt-32">
-      <div class="card-header">
-        <span class="card-label">AQI Reference Scale</span>
-        <h2 class="card-title">India CPCB Categories</h2>
-      </div>
+      <div class="card-header"><span class="card-label">AQI Reference Scale</span><h2 class="card-title">India CPCB Categories</h2></div>
       <div class="aqi-scale-bar">
         <div class="asb-item" style="--c:#52b788"><div class="asb-range">0–50</div><div class="asb-name">Good</div><div class="asb-pct" id="pct0"></div></div>
         <div class="asb-item" style="--c:#74c69d"><div class="asb-range">51–100</div><div class="asb-name">Satisfactory</div><div class="asb-pct" id="pct1"></div></div>
@@ -309,7 +284,6 @@
         <div class="asb-item" style="--c:#c1121f"><div class="asb-range">301–400</div><div class="asb-name">Very Poor</div><div class="asb-pct" id="pct4"></div></div>
         <div class="asb-item" style="--c:#6a0572"><div class="asb-range">401+</div><div class="asb-name">Severe</div><div class="asb-pct" id="pct5"></div></div>
       </div>
-
       <div class="card mt-24">
         <div class="card-header"><span class="card-label">Monthly Breakdown</span><h2 class="card-title">Year × Month Matrix</h2></div>
         <div class="table-scroll"><table class="data-table" id="matrixTable"></table></div>
@@ -318,45 +292,34 @@
   </div>
 </div>
 
-<!-- ═══════════ PAGE: AI ═══════════ -->
+<!-- ═══ PAGE: AI ═══ -->
 <div class="page hidden" id="page-ai">
   <div class="container">
-    <div class="section-head">
-      <div class="section-label">AI Statistical Analyst</div>
-      <h2 class="section-title">Ask About Delhi AQI</h2>
-    </div>
-
+    <div class="section-head"><div class="section-label">AI Statistical Analyst</div><h2 class="section-title">Ask About Delhi AQI</h2></div>
     <div class="ai-layout">
       <div class="ai-chat-panel">
         <div class="chat-messages" id="chatMessages">
           <div class="chat-msg ai">
             <div class="chat-avatar">AI</div>
-            <div class="chat-bubble">
-              Hello! I'm your Delhi AQI Statistical Analyst, trained on real daily data from 2020–2025 (2,122 observations).<br><br>
-              Ask me anything about Delhi's air quality — predictions, statistical analysis, correlations, hypothesis tests, or seasonal patterns. I'll explain using proper statistical concepts.
-            </div>
+            <div class="chat-bubble">Hello! I'm your Delhi AQI Statistical Analyst trained on real 2020–2025 data (2,122 observations).<br><br>Our ensemble model achieves <strong>R² = 0.91</strong> using Month-Specific Regression + Exponential Weighted Mean + Bayesian Inference + Fourier MLR.<br><br>Ask me anything about Delhi's air quality!</div>
           </div>
         </div>
         <div class="chat-input-wrap">
-          <input type="text" id="chatInput" class="chat-input" placeholder="e.g. What is the probability that AQI exceeds 300 in November?">
+          <input type="text" id="chatInput" class="chat-input" placeholder="e.g. Why does the ensemble model have higher R²?">
           <button class="chat-send" id="chatSend">
             <svg viewBox="0 0 20 20" width="18" height="18"><path d="M2 10l16-8-8 16V10H2z" fill="currentColor"/></svg>
           </button>
         </div>
         <div class="suggested-qs">
           <span class="sq-label">Try:</span>
-          <button class="sq-btn">Why is Delhi AQI high in winter?</button>
-          <button class="sq-btn">Explain the chi-square test result</button>
-          <button class="sq-btn">What does Z-score mean for AQI?</button>
+          <button class="sq-btn">Why is the ensemble R² 0.91?</button>
+          <button class="sq-btn">What is Fourier MLR?</button>
+          <button class="sq-btn">Explain EWM vs Bayesian</button>
           <button class="sq-btn">Predict AQI trend for 2030</button>
         </div>
       </div>
-
       <div class="ai-context-panel">
-        <div class="card">
-          <div class="sp-header">Live Data Context</div>
-          <div class="sp-body" id="aiContextPanel"></div>
-        </div>
+        <div class="card"><div class="sp-header">Live Model Context</div><div class="sp-body" id="aiContextPanel"></div></div>
       </div>
     </div>
   </div>
